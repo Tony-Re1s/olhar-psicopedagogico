@@ -1,0 +1,56 @@
+[
+ {
+  "id": "001",
+  "semana": "2026-11-16",
+  "data": "2026-11-18",
+  "formato": "carrossel",
+  "status": "rascunho",
+  "tema": "Apresentação: o que faz uma psicopedagoga",
+  "slides": [
+   {"modelo": "capa", "selo": "Prazer, Michelle", "titulo": "O que faz uma\n*psicopedagoga?*", "texto": "E quando vale a pena procurar uma para o seu filho."},
+   {"modelo": "texto", "selo": "Em poucas palavras", "titulo": "Eu cuido de\ncomo a criança *aprende*", "texto": "A psicopedagogia olha para o jeito único de cada criança aprender: o que facilita, o que trava e o que pode ser feito para ela avançar com mais confiança."},
+   {"modelo": "lista", "selo": "Quando procurar", "titulo": "Vale um olhar atento quando...", "icone": "♡", "itens": ["A lição de casa virou sinônimo de *choro ou briga*", "Ela se esforça, mas *não consegue acompanhar* a turma", "A escola sinalizou alguma *dificuldade*", "Ela começou a dizer que *\"não é capaz\"*"]},
+   {"modelo": "lista", "selo": "Como eu trabalho", "titulo": "Passo a passo", "icone": "1", "itens": ["*Escuta* da família", "*Avaliação* psicopedagógica", "*Intervenção* com atividades e jogos", "Parceria com a *escola*"], "texto": "Sempre no ritmo da criança."},
+   {"modelo": "cta", "titulo": "Vamos conversar?", "texto": "Atendimento com hora marcada\nem São Paulo — Zona Leste.", "botao": "Agende pelo WhatsApp 💜"}
+  ],
+  "legenda": "Muito prazer, eu sou a Michelle Reis, psicopedagoga 💜\n\nMeu trabalho é entender como cada criança aprende: o que ajuda, o que atrapalha e quais caminhos podem deixar o estudo mais leve para ela e para a família.\n\nAqui no perfil vou compartilhar dicas práticas para pais e mães sobre aprendizagem, rotina de estudos, alfabetização e autoestima na escola.\n\n📍 Atendimento com hora marcada em São Paulo (Zona Leste)\n📲 Agende pelo WhatsApp — link na bio\n\nSalve este post e me conta nos comentários: qual é a maior dúvida sobre os estudos do seu filho?",
+  "hashtags": ["psicopedagogia", "psicopedagoga", "aprendizagem", "maternidade", "zonalestesp"],
+  "story": {"selo": "Post novo", "emoji": "💜", "titulo": "Prazer,\n_Michelle_", "texto": "Sou psicopedagoga e vou te ajudar a entender como seu filho aprende.", "pergunta": "Qual a maior dúvida sobre os estudos do seu filho?"}
+ },
+ {
+  "id": "002",
+  "semana": "2026-11-16",
+  "data": "2026-11-20",
+  "formato": "carrossel",
+  "status": "rascunho",
+  "tema": "Sinais de que seu filho pode estar com dificuldade para aprender",
+  "slides": [
+   {"modelo": "capa", "selo": "Para pais e mães", "titulo": "5 sinais que\nmerecem um\n*olhar atento*", "texto": "Na hora da lição, alguns comportamentos dizem muito."},
+   {"modelo": "lista", "selo": "Fique de olho", "titulo": "Quando a criança...", "icone": "1", "itens": ["*Evita* ou adia a lição todos os dias", "Leva *muito mais tempo* que os colegas", "Esquece rápido o que *acabou de aprender*"]},
+   {"modelo": "lista", "selo": "Fique de olho", "titulo": "E também quando...", "icone": "1", "itens": ["Continua *trocando letras* depois da fase de alfabetização", "Fala que é *\"burra\"* ou que *\"não consegue\"*"]},
+   {"modelo": "texto", "selo": "Importante", "emoji": "🌱", "titulo": "Um sinal sozinho\n*não é diagnóstico*", "caixa": "Cada criança tem seu tempo. Mas se vários sinais aparecem juntos e por muito tempo, uma avaliação ajuda a entender o que está acontecendo — e a agir cedo."},
+   {"modelo": "cta", "titulo": "Ficou com dúvida?", "texto": "Me chama para conversar.\nAtendimento em São Paulo — Zona Leste.", "botao": "Agende pelo WhatsApp 💜"}
+  ],
+  "legenda": "Nem toda dificuldade na escola é preguiça ou falta de atenção 💜\n\nAlguns sinais na hora da lição merecem um olhar mais atento:\n1. Evitar ou adiar a lição todos os dias\n2. Levar muito mais tempo que os colegas\n3. Esquecer rápido o que acabou de aprender\n4. Continuar trocando letras depois da fase de alfabetização\n5. Dizer que é \"burra\" ou que \"não consegue\"\n\nUm sinal sozinho não é diagnóstico — cada criança tem seu ritmo. Mas quando vários aparecem juntos e por muito tempo, vale buscar uma avaliação para entender o que está acontecendo.\n\n📲 Ficou com dúvida? Me chama no WhatsApp — link na bio.\n\nSalve para lembrar e mande para aquela mãe ou pai que precisa ver isto.",
+  "hashtags": ["psicopedagogia", "dificuldadedeaprendizagem", "aprendizagem", "maternidade", "educacaoinfantil"],
+  "story": {"selo": "Post novo", "emoji": "🔎", "titulo": "5 sinais que\nmerecem um\n*olhar atento*", "texto": "Corre no feed para ver a lista completa.", "pergunta": "Seu filho tem algum desses sinais?"}
+ },
+ {
+  "id": "003",
+  "semana": "2026-11-16",
+  "data": "2026-11-23",
+  "formato": "carrossel",
+  "status": "rascunho",
+  "tema": "Rotina de estudos em casa sem brigas",
+  "slides": [
+   {"modelo": "capa", "selo": "Dicas práticas", "titulo": "Lição de casa\n*sem briga*", "texto": "4 ajustes simples para a rotina de estudos ficar mais leve."},
+   {"modelo": "lista", "selo": "Dica 1 e 2", "titulo": "Antes de começar", "icone": "1", "itens": ["*Mesmo horário* todos os dias — o cérebro gosta de previsibilidade", "*Lugar fixo*, sem TV ou celular por perto"]},
+   {"modelo": "lista", "selo": "Dica 3 e 4", "titulo": "Durante a lição", "icone": "♡", "itens": ["*Blocos curtos* (15 a 20 min) com pausas", "Elogie o *esforço*, não só a nota"]},
+   {"modelo": "citacao", "texto": "A criança aprende melhor quando se sente _segura_ para errar.", "autor": "Michelle Reis · Psicopedagoga"},
+   {"modelo": "cta", "titulo": "A lição ainda trava?", "texto": "Às vezes a dificuldade vai além da rotina.\nVamos conversar.", "botao": "Agende pelo WhatsApp 💜"}
+  ],
+  "legenda": "Se a lição de casa virou um momento de tensão, você não está sozinha 💜\n\n4 ajustes que ajudam muito:\n✨ Mesmo horário todos os dias\n✨ Lugar fixo, sem TV e celular por perto\n✨ Blocos curtos (15 a 20 minutos) com pausas\n✨ Elogiar o esforço, não só a nota\n\nE lembre: a criança aprende melhor quando se sente segura para errar.\n\nSe mesmo com uma boa rotina a lição continua travando, pode haver uma dificuldade que vale investigar.\n📲 Me chama no WhatsApp — link na bio.\n\nQual dessas dicas você vai testar primeiro?",
+  "hashtags": ["psicopedagogia", "rotinadeestudos", "licaodecasa", "maternidade", "dicasparapais"],
+  "story": {"selo": "Post novo", "emoji": "📚", "titulo": "Lição de casa\n*sem briga*", "texto": "4 ajustes simples no feed.", "pergunta": "Qual o maior desafio na hora da lição aí?"}
+ }
+]

@@ -1,0 +1,62 @@
+name: Telegram — aprovações e prévias
+
+# - De hora em hora: lê o que chegou no bot @pedagoga_post_bot (aprovações, trocas, /pausar, ideias)
+#   e grava na pauta.
+# - Quando a pauta muda no main (pauta nova da semana ou post refeito): manda a prévia das artes
+#   dos posts em "rascunho".
+# - À mão (Run workflow): ler, previa ou ids (mostra no log os ids de quem falou com o bot).
+on:
+  schedule:
+    - cron: "17 * * * *"
+  push:
+    branches: [main]
+    paths: ["instagram/pauta.json"]
+  workflow_dispatch:
+    inputs:
+      acao:
+        description: "ler, previa ou ids"
+        required: true
+        default: "ler"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pauta
+  cancel-in-progress: false
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Qual ação
+        id: acao
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then echo "acao=previa" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then echo "acao=${{ inputs.acao }}" >> $GITHUB_OUTPUT
+          else echo "acao=ler" >> $GITHUB_OUTPUT; fi
+      - name: Dependências da prévia
+        if: steps.acao.outputs.acao == 'previa'
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-color-emoji ffmpeg >/dev/null
+          pip install -q playwright pillow
+          python -m playwright install --with-deps chromium >/dev/null
+      - name: Rodar
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHATS: ${{ secrets.TELEGRAM_CHATS }}
+        run: |
+          if [ -z "$TELEGRAM_TOKEN" ]; then echo "TELEGRAM_TOKEN não configurado — nada a fazer."; exit 0; fi
+          python instagram/telegram.py "${{ steps.acao.outputs.acao }}"
+      - name: Gravar mudanças
+        run: |
+          git add instagram/pauta.json instagram/config.json instagram/pedidos.json 2>/dev/null || true
+          if git diff --cached --quiet; then echo "nada mudou"; exit 0; fi
+          git -c user.name="Olhar Bot" -c user.email="bot@users.noreply.github.com" commit -m "bot: ${{ steps.acao.outputs.acao }} pelo Telegram"
+          for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && exit 0; sleep 5; done
+          exit 1
