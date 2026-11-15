@@ -9,7 +9,7 @@ O que o bot faz:
            /status                mostra os próximos posts
            /pausar /retomar       para e volta a publicação
            /ideia <texto>         guarda uma ideia de post para as próximas pautas
-           qualquer outro texto   fica anotado como recado em pedidos.json
+           qualquer outro texto   é repassado aos outros chats, sem gravar nada (o repositório é público)
   ids      mostra no log os ids de quem mandou mensagem ao bot (para configurar TELEGRAM_CHATS)
 
 Os pedidos de troca e as ideias são lidos pelo Claude na tarefa agendada, que refaz o post e devolve
@@ -19,6 +19,7 @@ Secrets: TELEGRAM_TOKEN (token do bot) e TELEGRAM_CHATS (ids autorizados, separa
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sys
@@ -44,6 +45,11 @@ def _ler(arq: Path, padrao):
 
 def _gravar(arq: Path, dados):
     arq.write_text(json.dumps(dados, ensure_ascii=False, indent=1) + "\n")
+
+
+def _chave(chat: str) -> str:
+    """O repositório é público: no config.json guardo só um código derivado do chat, nunca o id do Telegram."""
+    return hashlib.sha256(f"olhar:{chat}".encode()).hexdigest()[:12]
 
 
 def config() -> dict:
@@ -165,7 +171,7 @@ def previa():
 AJUDA = ("Oi! Eu cuido dos posts do @olhar_.psicopedagogico 💜\n\n"
          "No sábado mando a prévia da semana para você aprovar.\n"
          "/status — próximos posts\n/pausar — para de publicar\n/retomar — volta a publicar\n"
-         "/ideia <texto> — guarda uma ideia de post\n\nQualquer outra mensagem fica anotada como recado.")
+         "/ideia <texto> — guarda uma ideia de post\n\nQualquer outra mensagem eu repasso para o Tony.")
 
 
 def _status(pauta: list[dict], cfg: dict) -> str:
@@ -215,7 +221,7 @@ def ler():
                 pid = dado.split(":", 1)[1]
                 if pid in por_id:
                     por_id[pid]["status"] = "trocar"
-                    cfg.setdefault("esperando", {})[chat] = pid
+                    cfg.setdefault("esperando", {})[_chave(chat)] = pid
                     enviar(f"Certo! O que você quer mudar no post {pid} ({por_id[pid]['tema']})?\n"
                            "Pode escrever do seu jeito: o tema, o texto, uma palavra…", chat)
             elif dado.startswith("postei:"):
@@ -244,13 +250,17 @@ def ler():
                 enviar("💡 Ideia guardada! Vou usar nas próximas pautas.", chat)
             else:
                 enviar("Escreva a ideia junto, assim: /ideia como ajudar na alfabetização", chat)
-        elif chat in cfg.get("esperando", {}):
-            pid = cfg["esperando"].pop(chat)
+        elif _chave(chat) in cfg.get("esperando", {}):
+            pid = cfg["esperando"].pop(_chave(chat))
             pedidos.append({"tipo": "troca", "post": pid, "texto": texto, "de": quem, "em": agora, "feito": False})
             enviar(f"Anotado! Vou refazer o post {pid} e te mando a nova versão para aprovar. 💜", chat)
         else:
-            pedidos.append({"tipo": "recado", "texto": texto, "de": quem, "em": agora, "feito": False})
-            enviar("Anotei seu recado 💜", chat)
+            # recado livre NÃO vai para o repositório (é público): só é repassado aos outros chats autorizados
+            for c in chats():
+                if c != chat:
+                    enviar(f"💬 Recado de {quem} no bot:\n\n{texto}", c)
+            enviar("Recebido! Passei seu recado para o Tony 💜\n"
+                   "(Para pedir mudança num post, use o botão 🔄 Trocar; para ideias, /ideia.)", chat)
     if mudou:
         _gravar(CONFIG, cfg)
         _gravar(PAUTA, pauta)
