@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       acao:
-        description: "ler, previa ou ids"
+        description: "ler, previa, ids ou checar"
         required: true
         default: "ler"
 
@@ -50,7 +50,10 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHATS: ${{ secrets.TELEGRAM_CHATS }}
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
         run: |
+          if [ "${{ steps.acao.outputs.acao }}" = "checar" ]; then python instagram/checar.py; exit 0; fi
           if [ -z "$TELEGRAM_TOKEN" ]; then echo "TELEGRAM_TOKEN não configurado — nada a fazer."; exit 0; fi
           python instagram/telegram.py "${{ steps.acao.outputs.acao }}"
       - name: Gravar mudanças
