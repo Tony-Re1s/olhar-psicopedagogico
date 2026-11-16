@@ -232,8 +232,18 @@ def ler():
     por_id = {p["id"]: p for p in pauta}
     esperando = cfg.setdefault("esperando", {})      # chave do chat -> "novo" ou id do post a mudar
     soltos = cfg.setdefault("soltos", {})            # chave do chat -> texto solto aguardando decisão
-    upd = api("getUpdates", offset=cfg.get("offset", 0) + 1, timeout=0, allowed_updates=["message", "callback_query"])
     mudou = False
+    if cfg.get("menu") != 2:      # menu de comandos que aparece ao digitar "/" no Telegram
+        api("setMyCommands", commands=[
+            {"command": "novo", "description": "Criar um post novo (texto ou áudio)"},
+            {"command": "mudar", "description": "Mudar o conteúdo de um post"},
+            {"command": "status", "description": "Ver os próximos posts"},
+            {"command": "pausar", "description": "Parar de publicar"},
+            {"command": "retomar", "description": "Voltar a publicar"},
+            {"command": "ajuda", "description": "Como eu funciono"}])
+        cfg["menu"] = 2
+        mudou = True
+    upd = api("getUpdates", offset=cfg.get("offset", 0) + 1, timeout=0, allowed_updates=["message", "callback_query"])
 
     def pedir(tipo: str, texto: str, quem: str, agora: str, post: str | None = None):
         item = {"tipo": tipo, "texto": texto, "de": quem, "em": agora, "feito": False}
