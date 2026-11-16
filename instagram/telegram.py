@@ -5,15 +5,17 @@ O que o bot faz:
            "✅ Aprovar a semana" e "🔄 Trocar este post". Os posts passam para "aguardando".
   ler      lê o que chegou no bot (cliques e mensagens) e atualiza a pauta. Roda de hora em hora.
            ✅ Aprovar a semana    os posts aguardando viram "aprovado" e saem sozinhos às 19h
-           🔄 Trocar este post    o bot pergunta o que mudar; a resposta vai para pedidos.json
+           🔄 Trocar / /mudar     o bot pergunta o que mudar (texto ou áudio); vira pedido "troca" em pedidos.json
+           /novo                  pede um post novo (texto ou áudio); vira pedido "novo" em pedidos.json
            /status                mostra os próximos posts
            /pausar /retomar       para e volta a publicação
-           /ideia <texto>         guarda uma ideia de post para as próximas pautas
-           qualquer outro texto   é repassado aos outros chats, sem gravar nada (o repositório é público)
+           texto/áudio solto      o bot pergunta: criar post novo, mudar um post ou era só recado
+                                  (recado não é gravado — só repassado aos outros chats, porque o repositório é público)
+  Áudios são transcritos no próprio GitHub Actions com faster-whisper (modelo "small", português), sem chave de API.
   ids      mostra no log os ids de quem mandou mensagem ao bot (para configurar TELEGRAM_CHATS)
 
-Os pedidos de troca e as ideias são lidos pelo Claude na tarefa agendada, que refaz o post e devolve
-para "rascunho". A prévia sai de novo sozinha.
+Os pedidos ("novo" e "troca") são lidos pelo Claude na tarefa agendada, que cria ou refaz o post e põe em
+"rascunho". O push dele manda a prévia de novo sozinho.
 
 Secrets: TELEGRAM_TOKEN (token do bot) e TELEGRAM_CHATS (ids autorizados, separados por vírgula).
 """
@@ -169,17 +171,53 @@ def previa():
 
 # ---------------------------------------------------------------- leitura das mensagens
 AJUDA = ("Oi! Eu cuido dos posts do @olhar_.psicopedagogico 💜\n\n"
-         "No sábado mando a prévia da semana para você aprovar.\n"
-         "/status — próximos posts\n/pausar — para de publicar\n/retomar — volta a publicar\n"
-         "/ideia <texto> — guarda uma ideia de post\n\nQualquer outra mensagem eu repasso para o Tony.")
+         "No sábado mando a prévia da semana para você aprovar. Você também pode, a qualquer hora:\n\n"
+         "➕ /novo — criar um post novo: me conta o tema ou o conteúdo, por texto ou ÁUDIO\n"
+         "✏️ /mudar — mudar o conteúdo de um post que ainda não saiu (texto ou áudio)\n"
+         "📋 /status — ver os próximos posts\n"
+         "⏸ /pausar e ▶️ /retomar — parar e voltar a publicar\n\n"
+         "Se mandar um texto ou áudio solto, eu pergunto o que fazer com ele.\n"
+         "Os pedidos viram arte e chegam aqui para você aprovar em algumas horas.")
+
+PRAZO = "Em algumas horas te mando a prévia aqui para aprovar. 💜"
+
+
+def _transcrever(midia: dict) -> str:
+    """Baixa o áudio do Telegram e transcreve em português com faster-whisper (roda no próprio GitHub Actions,
+    sem chave de API). O modelo fica em cache entre as execuções."""
+    import subprocess
+    import tempfile
+    try:
+        from faster_whisper import WhisperModel
+    except ImportError:
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", "faster-whisper"], check=True)
+        from faster_whisper import WhisperModel
+    caminho = api("getFile", file_id=midia["file_id"])["result"]["file_path"]
+    with urllib.request.urlopen(f"https://api.telegram.org/file/bot{_token()}/{caminho}", timeout=120) as r:
+        dados = r.read()
+    with tempfile.NamedTemporaryFile(suffix=Path(caminho).suffix or ".ogg", delete=False) as f:
+        f.write(dados)
+    modelo = WhisperModel(os.environ.get("WHISPER_MODELO", "small"), device="cpu", compute_type="int8")
+    trechos, _ = modelo.transcribe(f.name, language="pt", vad_filter=True)
+    return " ".join(t.text.strip() for t in trechos).strip()
+
+
+def _abertos(pauta: list[dict]) -> list[dict]:
+    """Posts que ainda podem ser mudados (não publicados, data de hoje em diante)."""
+    hoje = datetime.now(TZ).date()
+    return [p for p in sorted(pauta, key=lambda x: (x.get("data") or "", x["id"]))
+            if p.get("status") != "publicado" and (not p.get("data") or date.fromisoformat(p["data"]) >= hoje)]
+
+
+def _botoes_posts(pauta: list[dict], prefixo: str) -> list[list[dict]]:
+    return [[{"text": f"{p['id']} · {_quando(p).split(' às')[0]} · {p['tema'][:40]}", "callback_data": f"{prefixo}:{p['id']}"}]
+            for p in _abertos(pauta)[:8]]
 
 
 def _status(pauta: list[dict], cfg: dict) -> str:
     nomes = {"rascunho": "em preparação", "aguardando": "esperando aprovação", "aprovado": "aprovado ✅",
              "trocar": "em ajuste 🔄", "publicado": "publicado"}
-    proximos = [p for p in sorted(pauta, key=lambda x: x.get("data") or "")
-                if p.get("data") and date.fromisoformat(p["data"]) >= datetime.now(TZ).date()]
-    linhas = [f"• {_quando(p)}: {p['tema']} ({nomes.get(p.get('status'), p.get('status'))})" for p in proximos[:6]]
+    linhas = [f"• {_quando(p)}: {p['tema']} ({nomes.get(p.get('status'), p.get('status'))})" for p in _abertos(pauta)[:6]]
     topo = "⏸ Publicação PAUSADA (use /retomar)\n\n" if cfg.get("pausado") else ""
     return topo + ("Próximos posts:\n" + "\n".join(linhas) if linhas else "Nenhum post agendado ainda.")
 
@@ -192,23 +230,38 @@ def ler():
     autorizados = set(chats())
     cfg, pauta, pedidos = config(), _ler(PAUTA, []), _ler(PEDIDOS, [])
     por_id = {p["id"]: p for p in pauta}
+    esperando = cfg.setdefault("esperando", {})      # chave do chat -> "novo" ou id do post a mudar
+    soltos = cfg.setdefault("soltos", {})            # chave do chat -> texto solto aguardando decisão
     upd = api("getUpdates", offset=cfg.get("offset", 0) + 1, timeout=0, allowed_updates=["message", "callback_query"])
     mudou = False
+
+    def pedir(tipo: str, texto: str, quem: str, agora: str, post: str | None = None):
+        item = {"tipo": tipo, "texto": texto, "de": quem, "em": agora, "feito": False}
+        if post:
+            item["post"] = post
+            if post in por_id:
+                por_id[post]["status"] = "trocar"
+        pedidos.append(item)
+
     for u in upd.get("result", []):
         cfg["offset"] = u["update_id"]
         mudou = True
         cb = u.get("callback_query")
         msg = u.get("message") or (cb or {}).get("message") or {}
         chat = str(msg.get("chat", {}).get("id", ""))
+        k = _chave(chat)
         quem = (cb or msg).get("from", {}).get("first_name", "")
         if chat not in autorizados:
             print(f"mensagem de chat não autorizado: ...{chat[-3:]}")
             continue
         agora = datetime.now(TZ).isoformat(timespec="minutes")
+
+        # ------------------------------------------------ botões
         if cb:
             dado = cb.get("data", "")
             api("answerCallbackQuery", callback_query_id=cb["id"])
-            if dado == "aprovar":
+            acao, _, pid = dado.partition(":")
+            if acao == "aprovar":
                 ok = [p for p in pauta if p.get("status") == "aguardando"]
                 for p in ok:
                     p["status"] = "aprovado"
@@ -217,22 +270,47 @@ def ler():
                            "\n".join(f"• {_quando(p)}: {p['tema']}" for p in sorted(ok, key=lambda x: x.get('data') or '')))
                 else:
                     enviar("Não há posts esperando aprovação agora. 😊", chat)
-            elif dado.startswith("trocar:"):
-                pid = dado.split(":", 1)[1]
-                if pid in por_id:
-                    por_id[pid]["status"] = "trocar"
-                    cfg.setdefault("esperando", {})[_chave(chat)] = pid
-                    enviar(f"Certo! O que você quer mudar no post {pid} ({por_id[pid]['tema']})?\n"
-                           "Pode escrever do seu jeito: o tema, o texto, uma palavra…", chat)
-            elif dado.startswith("postei:"):
-                pid = dado.split(":", 1)[1]
+            elif acao == "trocar" and pid in por_id:
+                esperando[k] = pid
+                enviar(f"Certo! O que você quer mudar no post {pid} ({por_id[pid]['tema']})?\n"
+                       "Pode escrever ou mandar um ÁUDIO: o tema, o texto, uma frase, o que quiser. 🎙️", chat)
+            elif acao == "livre" and pid == "novo" and k in soltos:
+                pedir("novo", soltos.pop(k), quem, agora)
+                enviar("➕ Combinado, vou criar um post novo com isso. " + PRAZO, chat)
+            elif acao == "livre" and pid == "mudar" and k in soltos:
+                bts = _botoes_posts(pauta, "aplicar")
+                enviar("Em qual post eu aplico isso?" if bts else "Não há posts abertos para mudar agora.", chat, bts or None)
+            elif acao == "aplicar" and pid in por_id and k in soltos:
+                pedir("troca", soltos.pop(k), quem, agora, pid)
+                enviar(f"✏️ Anotado! Vou refazer o post {pid}. " + PRAZO, chat)
+            elif acao == "livre" and pid == "recado" and k in soltos:
+                texto = soltos.pop(k)
+                for c in chats():
+                    if c != chat:
+                        enviar(f"💬 Recado de {quem} no bot:\n\n{texto}", c)
+                enviar("Recebido! Passei seu recado. 💜", chat)
+            elif acao == "postei":
                 cfg.setdefault("reels_postados", {})[pid] = agora
                 enviar("Obrigado! Reels marcado como postado 💜", chat)
             continue
-        texto = (msg.get("text") or "").strip()
+
+        # ------------------------------------------------ mensagens (texto ou áudio)
+        texto = (msg.get("text") or msg.get("caption") or "").strip()
+        midia = msg.get("voice") or msg.get("audio") or msg.get("video_note")
+        if midia and not texto:
+            try:
+                api("sendChatAction", chat_id=chat, action="typing")
+                texto = _transcrever(midia)
+                enviar(f"🎙️ Entendi assim:\n\n«{texto}»", chat)
+            except Exception as err:  # noqa: BLE001
+                print("aviso: não consegui transcrever o áudio:", err)
+                enviar("Não consegui entender esse áudio 😕 Pode mandar de novo ou escrever?", chat)
+                continue
         if not texto:
             continue
-        cmd = texto.split()[0].split("@")[0].lower()
+        palavras = texto.split()
+        cmd = palavras[0].split("@")[0].lower() if texto.startswith("/") else ""
+        resto = texto[len(palavras[0]):].strip() if cmd else texto
         if cmd in ("/start", "/ajuda", "/help"):
             enviar(AJUDA, chat)
         elif cmd == "/status":
@@ -243,24 +321,32 @@ def ler():
         elif cmd == "/retomar":
             cfg["pausado"] = False
             enviar(f"▶️ {quem} retomou a publicação.")
-        elif cmd == "/ideia":
-            ideia = texto[len(texto.split()[0]):].strip()
-            if ideia:
-                pedidos.append({"tipo": "ideia", "texto": ideia, "de": quem, "em": agora, "feito": False})
-                enviar("💡 Ideia guardada! Vou usar nas próximas pautas.", chat)
+        elif cmd in ("/novo", "/ideia"):
+            if resto:
+                pedir("novo", resto, quem, agora)
+                enviar("➕ Anotado, vou criar um post novo com isso. " + PRAZO, chat)
             else:
-                enviar("Escreva a ideia junto, assim: /ideia como ajudar na alfabetização", chat)
-        elif _chave(chat) in cfg.get("esperando", {}):
-            pid = cfg["esperando"].pop(_chave(chat))
-            pedidos.append({"tipo": "troca", "post": pid, "texto": texto, "de": quem, "em": agora, "feito": False})
-            enviar(f"Anotado! Vou refazer o post {pid} e te mando a nova versão para aprovar. 💜", chat)
+                esperando[k] = "novo"
+                enviar("➕ Vamos criar! Me conta o tema ou o conteúdo do post, por texto ou por áudio. 🎙️", chat)
+        elif cmd in ("/mudar", "/trocar"):
+            bts = _botoes_posts(pauta, "trocar")
+            enviar("Qual post você quer mudar?" if bts else "Não há posts abertos para mudar agora.", chat, bts or None)
+        elif cmd:
+            enviar("Não conheço esse comando. Mande /ajuda para ver o que eu sei fazer.", chat)
+        elif k in esperando:
+            alvo = esperando.pop(k)
+            if alvo == "novo":
+                pedir("novo", texto, quem, agora)
+                enviar("➕ Anotado, vou criar um post novo com isso. " + PRAZO, chat)
+            else:
+                pedir("troca", texto, quem, agora, alvo)
+                enviar(f"✏️ Anotado! Vou refazer o post {alvo}. " + PRAZO, chat)
         else:
-            # recado livre NÃO vai para o repositório (é público): só é repassado aos outros chats autorizados
-            for c in chats():
-                if c != chat:
-                    enviar(f"💬 Recado de {quem} no bot:\n\n{texto}", c)
-            enviar("Recebido! Passei seu recado para o Tony 💜\n"
-                   "(Para pedir mudança num post, use o botão 🔄 Trocar; para ideias, /ideia.)", chat)
+            soltos[k] = texto
+            enviar("O que eu faço com isso?", chat, [
+                [{"text": "➕ Criar um post novo", "callback_data": "livre:novo"}],
+                [{"text": "✏️ Mudar um post que já existe", "callback_data": "livre:mudar"}],
+                [{"text": "💬 Era só um recado", "callback_data": "livre:recado"}]])
     if mudou:
         _gravar(CONFIG, cfg)
         _gravar(PAUTA, pauta)
