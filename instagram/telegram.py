@@ -202,7 +202,7 @@ def ler():
         chat = str(msg.get("chat", {}).get("id", ""))
         quem = (cb or msg).get("from", {}).get("first_name", "")
         if chat not in autorizados:
-            print(f"mensagem de chat não autorizado: {chat} ({quem})")
+            print(f"mensagem de chat não autorizado: ...{chat[-3:]}")
             continue
         agora = datetime.now(TZ).isoformat(timespec="minutes")
         if cb:
@@ -278,8 +278,14 @@ def ids():
         c = m.get("chat", {})
         if c.get("id"):
             vistos[c["id"]] = " ".join(x for x in (c.get("first_name"), c.get("last_name")) if x)
+    # o log do Actions é público: mostra só o final do id e a inicial do nome.
+    # O id completo vai por mensagem privada para o próprio chat.
     for k, v in vistos.items():
-        print(f"chat {k}: {v}")
+        print(f"chat ...{str(k)[-3:]}: {v[:1]}.")
+        try:
+            api("sendMessage", chat_id=k, text=f"Seu id do Telegram para o Secret TELEGRAM_CHATS é: {k}")
+        except Exception as err:  # noqa: BLE001
+            print("  aviso: não consegui mandar o id por mensagem:", err)
     if not vistos:
         print("Ninguém mandou mensagem ao bot ainda (mande /start para ele e rode de novo).")
 
