@@ -219,6 +219,8 @@ def _status(pauta: list[dict], cfg: dict) -> str:
              "trocar": "em ajuste 🔄", "publicado": "publicado"}
     linhas = [f"• {_quando(p)}: {p['tema']} ({nomes.get(p.get('status'), p.get('status'))})" for p in _abertos(pauta)[:6]]
     topo = "⏸ Publicação PAUSADA (use /retomar)\n\n" if cfg.get("pausado") else ""
+    if cfg.get("teste"):
+        topo += "🧪 Modo de teste: pode aprovar, mudar e criar à vontade — nada vai para o Instagram até o Tony liberar.\n\n"
     return topo + ("Próximos posts:\n" + "\n".join(linhas) if linhas else "Nenhum post agendado ainda.")
 
 
@@ -276,7 +278,9 @@ def ler():
                 for p in ok:
                     p["status"] = "aprovado"
                 if ok:
-                    enviar(f"✅ {quem} aprovou {len(ok)} post(s). Vão sair sozinhos:\n" +
+                    enviar(f"✅ {quem} aprovou {len(ok)} post(s)" +
+                           (" (🧪 modo de teste: nada vai para o Instagram até o Tony liberar):\n" if cfg.get("teste")
+                            else ". Vão sair sozinhos:\n") +
                            "\n".join(f"• {_quando(p)}: {p['tema']}" for p in sorted(ok, key=lambda x: x.get('data') or '')))
                 else:
                     enviar("Não há posts esperando aprovação agora. 😊", chat)
