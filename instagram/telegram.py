@@ -26,6 +26,7 @@ import json
 import os
 import sys
 import urllib.parse
+import urllib.error
 import urllib.request
 import uuid
 from datetime import date, datetime
@@ -271,7 +272,10 @@ def ler():
         # ------------------------------------------------ botões
         if cb:
             dado = cb.get("data", "")
-            api("answerCallbackQuery", callback_query_id=cb["id"])
+            try:
+                api("answerCallbackQuery", callback_query_id=cb["id"])
+            except urllib.error.HTTPError:
+                pass  # clique antigo: o Telegram recusa a resposta, mas o clique vale
             acao, _, pid = dado.partition(":")
             if acao == "aprovar":
                 ok = [p for p in pauta if p.get("status") == "aguardando"]
