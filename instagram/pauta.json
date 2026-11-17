@@ -2,9 +2,9 @@
  {
   "id": "001",
   "semana": "2026-11-16",
-  "data": "2026-11-18",
+  "data": "2026-11-16",
   "formato": "carrossel",
-  "status": "aguardando",
+  "status": "rascunho",
   "tema": "Apresentação: o que faz uma psicopedagoga",
   "slides": [
    {
@@ -70,9 +70,9 @@
  {
   "id": "002",
   "semana": "2026-11-16",
-  "data": "2026-11-20",
+  "data": "2026-11-18",
   "formato": "carrossel",
-  "status": "aguardando",
+  "status": "rascunho",
   "tema": "Sinais de que seu filho pode estar com dificuldade para aprender",
   "slides": [
    {
@@ -135,9 +135,9 @@
  {
   "id": "003",
   "semana": "2026-11-16",
-  "data": "2026-11-23",
+  "data": "2026-11-20",
   "formato": "carrossel",
-  "status": "aguardando",
+  "status": "rascunho",
   "tema": "Rotina de estudos em casa sem brigas",
   "slides": [
    {
