@@ -198,8 +198,14 @@ def _transcrever(midia: dict) -> str:
         dados = r.read()
     with tempfile.NamedTemporaryFile(suffix=Path(caminho).suffix or ".ogg", delete=False) as f:
         f.write(dados)
+    # Decodifica com o ffmpeg do sistema (16 kHz, mono): o decodificador interno do faster-whisper (PyAV)
+    # quebra com versões novas da biblioteca.
+    import numpy as np
+    bruto = subprocess.run(["ffmpeg", "-nostdin", "-loglevel", "error", "-i", f.name, "-f", "s16le",
+                            "-ac", "1", "-ar", "16000", "-"], capture_output=True, check=True).stdout
+    audio = np.frombuffer(bruto, np.int16).astype(np.float32) / 32768.0
     modelo = WhisperModel(os.environ.get("WHISPER_MODELO", "small"), device="cpu", compute_type="int8")
-    trechos, _ = modelo.transcribe(f.name, language="pt", vad_filter=True)
+    trechos, _ = modelo.transcribe(audio, language="pt", vad_filter=True)
     return " ".join(t.text.strip() for t in trechos).strip()
 
 
