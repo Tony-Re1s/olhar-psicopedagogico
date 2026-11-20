@@ -1,7 +1,7 @@
 name: Telegram — aprovações e prévias
 
-# - De hora em hora: lê o que chegou no bot @pedagoga_post_bot (aprovações, trocas, /pausar, ideias)
-#   e grava na pauta.
+# - O bot fica ligado ("escutar"): responde o Telegram na hora, por ~5h30 por turno, e no fim
+#   dispara o próximo turno sozinho. O agendamento de hora em hora só religa se ele tiver caído.
 # - Quando a pauta muda no main (pauta nova da semana ou post refeito): manda a prévia das artes
 #   dos posts em "rascunho".
 # - À mão (Run workflow): ler, previa ou ids (mostra no log os ids de quem falou com o bot).
@@ -14,21 +14,22 @@ on:
   workflow_dispatch:
     inputs:
       acao:
-        description: "ler, previa, ids ou checar"
+        description: "escutar, ler, previa, ids ou checar (não rode ler com o bot ligado)"
         required: true
-        default: "ler"
+        default: "escutar"
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
-  group: pauta
+  group: ${{ (github.event_name == 'schedule' || inputs.acao == 'escutar') && 'escuta' || 'pauta' }}
   cancel-in-progress: false
 
 jobs:
   bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,13 +40,18 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then echo "acao=previa" >> $GITHUB_OUTPUT
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then echo "acao=${{ inputs.acao }}" >> $GITHUB_OUTPUT
-          else echo "acao=ler" >> $GITHUB_OUTPUT; fi
+          else echo "acao=escutar" >> $GITHUB_OUTPUT; fi
       - name: Cache do modelo de transcrição de áudio
-        if: steps.acao.outputs.acao == 'ler'
+        if: steps.acao.outputs.acao == 'ler' || steps.acao.outputs.acao == 'escutar'
         uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
           key: whisper-small-v1
+      - name: Conversor de áudio
+        if: steps.acao.outputs.acao == 'ler' || steps.acao.outputs.acao == 'escutar'
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          pip install -q faster-whisper
       - name: Dependências da prévia
         if: steps.acao.outputs.acao == 'previa'
         run: |
@@ -69,3 +75,8 @@ jobs:
           git -c user.name="Olhar Bot" -c user.email="bot@users.noreply.github.com" commit -m "bot: ${{ steps.acao.outputs.acao }} pelo Telegram"
           for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && exit 0; sleep 5; done
           exit 1
+      - name: Começar o próximo turno do bot
+        if: success() && steps.acao.outputs.acao == 'escutar'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run telegram.yml --ref main -R ${{ github.repository }} -f acao=escutar

@@ -3,6 +3,7 @@
 O que o bot faz:
   previa   manda as artes e as legendas dos posts em rascunho da semana, com os botões
            "✅ Aprovar a semana" e "🔄 Trocar este post". Os posts passam para "aguardando".
+  escutar  fica ligado (até ~5h30 por vez, reinicia sozinho) e responde na hora; é o modo normal.
   ler      lê o que chegou no bot (cliques e mensagens) e atualiza a pauta. Roda de hora em hora.
            ✅ Aprovar a semana    os posts aguardando viram "aprovado" e saem sozinhos às 19h
            🔄 Trocar / /mudar     o bot pergunta o que mudar (texto ou áudio); vira pedido "troca" em pedidos.json
@@ -78,7 +79,8 @@ def chats() -> list[str]:
 def api(metodo: str, **params) -> dict:
     dados = urllib.parse.urlencode({k: (json.dumps(v) if isinstance(v, (dict, list)) else v)
                                     for k, v in params.items() if v is not None}).encode()
-    with urllib.request.urlopen(f"https://api.telegram.org/bot{_token()}/{metodo}", dados, timeout=60) as r:
+    espera = 60 + int(params.get("timeout") or 0)
+    with urllib.request.urlopen(f"https://api.telegram.org/bot{_token()}/{metodo}", dados, timeout=espera) as r:
         return json.loads(r.read().decode())
 
 
@@ -180,7 +182,10 @@ AJUDA = ("Oi! Eu cuido dos posts do @olhar_.psicopedagogico 💜\n\n"
          "Se mandar um texto ou áudio solto, eu pergunto o que fazer com ele.\n"
          "Os pedidos viram arte e chegam aqui para você aprovar em algumas horas.")
 
-PRAZO = "Em algumas horas te mando a prévia aqui para aprovar. 💜"
+PRAZO = "Em até 1 hora te mando a prévia aqui para aprovar. 💜"
+
+
+_MODELO = None
 
 
 def _transcrever(midia: dict) -> str:
@@ -204,8 +209,10 @@ def _transcrever(midia: dict) -> str:
     bruto = subprocess.run(["ffmpeg", "-nostdin", "-loglevel", "error", "-i", f.name, "-f", "s16le",
                             "-ac", "1", "-ar", "16000", "-"], capture_output=True, check=True).stdout
     audio = np.frombuffer(bruto, np.int16).astype(np.float32) / 32768.0
-    modelo = WhisperModel(os.environ.get("WHISPER_MODELO", "small"), device="cpu", compute_type="int8")
-    trechos, _ = modelo.transcribe(audio, language="pt", vad_filter=True)
+    global _MODELO
+    if _MODELO is None:
+        _MODELO = WhisperModel(os.environ.get("WHISPER_MODELO", "small"), device="cpu", compute_type="int8")
+    trechos, _ = _MODELO.transcribe(audio, language="pt", vad_filter=True)
     return " ".join(t.text.strip() for t in trechos).strip()
 
 
@@ -231,11 +238,11 @@ def _status(pauta: list[dict], cfg: dict) -> str:
     return topo + ("Próximos posts:\n" + "\n".join(linhas) if linhas else "Nenhum post agendado ainda.")
 
 
-def ler():
+def ler(espera: int = 0) -> bool:
     if not (_token() and chats()):
         # sem a lista de chats não lê nada, para não "consumir" as mensagens antes de rodar `ids`
         print("TELEGRAM_TOKEN ou TELEGRAM_CHATS não configurado.")
-        return
+        return False
     autorizados = set(chats())
     cfg, pauta, pedidos = config(), _ler(PAUTA, []), _ler(PEDIDOS, [])
     por_id = {p["id"]: p for p in pauta}
@@ -252,7 +259,7 @@ def ler():
             {"command": "ajuda", "description": "Como eu funciono"}])
         cfg["menu"] = 2
         mudou = True
-    upd = api("getUpdates", offset=cfg.get("offset", 0) + 1, timeout=0, allowed_updates=["message", "callback_query"])
+    upd = api("getUpdates", offset=cfg.get("offset", 0) + 1, timeout=espera, allowed_updates=["message", "callback_query"])
 
     def pedir(tipo: str, texto: str, quem: str, agora: str, post: str | None = None):
         item = {"tipo": tipo, "texto": texto, "de": quem, "em": agora, "feito": False}
@@ -376,8 +383,9 @@ def ler():
         _gravar(PAUTA, pauta)
         _gravar(PEDIDOS, pedidos)
         print(f"{len(upd.get('result', []))} atualização(ões) processada(s)")
-    else:
+    elif not espera:
         print("Nada novo no Telegram.")
+    return mudou
 
 
 def ids():
@@ -400,7 +408,42 @@ def ids():
         print("Ninguém mandou mensagem ao bot ainda (mande /start para ele e rode de novo).")
 
 
+def _git(*args: str) -> int:
+    import subprocess
+    return subprocess.run(["git", *args], cwd=D.parent).returncode
+
+
+def escutar():
+    """Fica ligado respondendo o Telegram na hora (long polling), por até ESCUTA_MIN minutos.
+    Grava e manda para o GitHub a cada mudança. O workflow se reinicia sozinho no fim."""
+    import time
+    fim = time.time() + 60 * int(os.environ.get("ESCUTA_MIN", "330"))
+    print("Bot ligado, respondendo na hora.")
+    while time.time() < fim:
+        _git("pull", "--rebase", "-q", "origin", "main")
+        try:
+            mudou = ler(espera=50)
+        except urllib.error.HTTPError as err:
+            print("aviso: Telegram respondeu", err.code)
+            time.sleep(30)
+            continue
+        except Exception as err:  # noqa: BLE001  (rede instável: tenta de novo)
+            print("aviso:", type(err).__name__, err)
+            time.sleep(10)
+            continue
+        if mudou:
+            _git("add", "instagram/pauta.json", "instagram/config.json", "instagram/pedidos.json")
+            if _git("diff", "--cached", "--quiet"):
+                _git("-c", "user.name=Olhar Bot", "-c", "user.email=bot@users.noreply.github.com",
+                     "commit", "-q", "-m", "bot: ler pelo Telegram")
+                for _ in range(3):
+                    if _git("pull", "--rebase", "-q", "origin", "main") == 0 and _git("push", "-q", "origin", "HEAD:main") == 0:
+                        break
+                    time.sleep(5)
+    print("Fim do turno do bot; o próximo começa em seguida.")
+
+
 if __name__ == "__main__":
     sys.path.insert(0, str(D))
     acao = sys.argv[1] if len(sys.argv) > 1 else "ler"
-    {"previa": previa, "ler": ler, "ids": ids}[acao]()
+    {"previa": previa, "ler": ler, "ids": ids, "escutar": escutar}[acao]()
