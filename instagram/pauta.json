@@ -193,5 +193,80 @@
    "texto": "4 ajustes simples no feed.",
    "pergunta": "Qual o maior desafio na hora da lição aí?"
   }
+ },
+ {
+  "id": "004",
+  "formato": "carrossel",
+  "tema": "Comportamento desafiador na infância: o que é TOD e quando buscar ajuda",
+  "slides": [
+   {
+    "modelo": "capa",
+    "selo": "Comportamento na infância",
+    "titulo": "Seu filho diz\n*\"não\"* para tudo?",
+    "texto": "Entenda o que é o TOD e quando vale buscar ajuda."
+   },
+   {
+    "modelo": "texto",
+    "selo": "Informação",
+    "emoji": "📖",
+    "titulo": "O que é\n*TOD?*",
+    "caixa": "TOD é a sigla de Transtorno Opositor Desafiador: um padrão de irritação, desafio e oposição a regras e adultos que se repete por muito tempo e pesa na rotina."
+   },
+   {
+    "modelo": "lista",
+    "selo": "Calma",
+    "titulo": "Nem todo \"não\" é TOD",
+    "icone": "♡",
+    "itens": [
+     "*Birras* são comuns, principalmente em crianças pequenas",
+     "*Testar limites* faz parte do crescimento",
+     "Sono, fome e *mudanças* mexem com o humor",
+     "Às vezes a *irritação* esconde uma dificuldade na escola"
+    ]
+   },
+   {
+    "modelo": "lista",
+    "selo": "Fique de olho",
+    "titulo": "Quando merece atenção",
+    "icone": "1",
+    "itens": [
+     "Desafio e raiva *quase todos os dias*",
+     "Dura *meses*, não é só uma fase difícil",
+     "Atrapalha *casa, escola* e amizades"
+    ]
+   },
+   {
+    "modelo": "texto",
+    "selo": "Importante",
+    "emoji": "🌱",
+    "titulo": "Um sinal sozinho\n*não é diagnóstico*",
+    "caixa": "O diagnóstico é feito por profissionais de saúde habilitados. Como psicopedagoga, eu olho para como a criança aprende e trabalho junto com a família e a escola."
+   },
+   {
+    "modelo": "cta",
+    "titulo": "Quer conversar?",
+    "texto": "Me chama para conversar.\nAtendimento com hora marcada\nem São Paulo — Zona Leste.",
+    "botao": "Agende pelo WhatsApp 💜"
+   }
+  ],
+  "legenda": "Seu filho responde tudo com \"não\", se irrita à toa ou desafia toda regra? Respira: você não está sozinho(a) 💜\n\nVocê pode ter ouvido falar em TOD (Transtorno Opositor Desafiador). É um padrão de irritação, desafio e oposição a regras e adultos que se repete por muito tempo e pesa na rotina da criança e da família.\n\nMas atenção: nem todo \"não\" é TOD.\n• Birras são comuns na infância\n• Testar limites faz parte do crescimento\n• Sono, fome e mudanças afetam o humor\n• Às vezes a irritação esconde uma dificuldade na escola\n\nVale um olhar atento quando o desafio aparece quase todos os dias, dura meses e atrapalha casa, escola e amizades.\n\nUm sinal sozinho não é diagnóstico. Quem diagnostica são profissionais de saúde habilitados. Como psicopedagoga, eu olho para como a criança aprende e trabalho em parceria com a família e a escola, no ritmo de cada criança.\n\n📲 Quer conversar? Me chama no WhatsApp — link na bio.\n\nSalve este post e me conta nos comentários: qual comportamento do seu filho mais te preocupa?",
+  "hashtags": [
+   "psicopedagogia",
+   "comportamentoinfantil",
+   "tod",
+   "maternidade",
+   "educacaoinfantil"
+  ],
+  "story": {
+   "selo": "Post novo",
+   "emoji": "💬",
+   "titulo": "Nem todo \"não\"\né *TOD*",
+   "texto": "Corre no feed para entender a diferença entre fase e sinal de atenção.",
+   "pergunta": "Qual comportamento do seu filho mais te desafia hoje?"
+  },
+  "status": "sugestao",
+  "pedido": "Criar conteúdo sobre comportamentos. É TOD, por exemplo.",
+  "criado": "2026-11-20T17:05-03:00",
+  "enviada": true
  }
 ]
