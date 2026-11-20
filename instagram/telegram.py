@@ -5,6 +5,7 @@ O que o bot faz:
            "✅ Aprovar a semana" e "🔄 Trocar este post". Os posts passam para "aguardando".
   escutar  fica ligado (até ~5h30 por vez, reinicia sozinho) e responde na hora; é o modo normal.
   ler      lê o que chegou no bot (cliques e mensagens) e atualiza a pauta. Roda de hora em hora.
+           /novo (com ANTHROPIC_API_KEY) cria a arte na hora e manda a sugestão; ✅ escolhe dia e horário
            ✅ Aprovar a semana    os posts aguardando viram "aprovado" e saem sozinhos às 19h
            🔄 Trocar / /mudar     o bot pergunta o que mudar (texto ou áudio); vira pedido "troca" em pedidos.json
            /novo                  pede um post novo (texto ou áudio); vira pedido "novo" em pedidos.json
@@ -64,7 +65,7 @@ def _quando(p: dict) -> str:
     if not p.get("data"):
         return "sem data"
     d = date.fromisoformat(p["data"])
-    return f"{DIAS[d.weekday()]} {d:%d/%m} às 19h"
+    return f"{DIAS[d.weekday()]} {d:%d/%m} às {int((p.get('hora') or '19')[:2])}h"
 
 
 # ---------------------------------------------------------------- API do Telegram
@@ -180,7 +181,7 @@ AJUDA = ("Oi! Eu cuido dos posts do @olhar_.psicopedagogico 💜\n\n"
          "📋 /status — ver os próximos posts\n"
          "⏸ /pausar e ▶️ /retomar — parar e voltar a publicar\n\n"
          "Se mandar um texto ou áudio solto, eu pergunto o que fazer com ele.\n"
-         "Os pedidos viram arte e chegam aqui para você aprovar em algumas horas.")
+         "Quando você pede um post novo, a arte chega aqui para você ver. Se gostar, toque em ✅ e escolha o dia e o horário.")
 
 PRAZO = "Em até 1 hora te mando a prévia aqui para aprovar. 💜"
 
@@ -230,12 +231,55 @@ def _botoes_posts(pauta: list[dict], prefixo: str) -> list[list[dict]]:
 
 def _status(pauta: list[dict], cfg: dict) -> str:
     nomes = {"rascunho": "em preparação", "aguardando": "esperando aprovação", "aprovado": "aprovado ✅",
-             "trocar": "em ajuste 🔄", "publicado": "publicado"}
+             "trocar": "em ajuste 🔄", "publicado": "publicado", "sugestao": "sugestão: falta você aprovar e escolher o dia"}
     linhas = [f"• {_quando(p)}: {p['tema']} ({nomes.get(p.get('status'), p.get('status'))})" for p in _abertos(pauta)[:6]]
     topo = "⏸ Publicação PAUSADA (use /retomar)\n\n" if cfg.get("pausado") else ""
     if cfg.get("teste"):
         topo += "🧪 Modo de teste: pode aprovar, mudar e criar à vontade — nada vai para o Instagram até o Tony liberar.\n\n"
     return topo + ("Próximos posts:\n" + "\n".join(linhas) if linhas else "Nenhum post agendado ainda.")
+
+
+def _mandar_sugestao(p: dict, titulo: str):
+    """Manda a arte de um post recém-criado, com os botões para aprovar e programar, ajustar ou descartar."""
+    import estudio
+    pasta = estudio.gerar(p)
+    imagens = sorted(f for f in pasta.iterdir() if f.suffix == ".png" and f.stem != "story")
+    if (pasta / "story.png").exists():
+        imagens.append(pasta / "story.png")
+    p["enviada"] = True
+    for c in chats():
+        enviar(titulo, c)
+        _fotos(c, imagens)
+        enviar("Legenda:\n\n" + estudio.legenda(p), c, [
+            [{"text": "✅ Gostei — escolher dia e horário", "callback_data": f"prog:{p['id']}"}],
+            [{"text": "✏️ Ajustar", "callback_data": f"trocar:{p['id']}"},
+             {"text": "🗑 Descartar", "callback_data": f"descartar:{p['id']}"}]])
+
+
+def _botoes_dias(pid: str) -> list[list[dict]]:
+    hoje = datetime.now(TZ)
+    linhas, linha = [], []
+    for n in range(0, 14):
+        d = date.fromordinal(hoje.date().toordinal() + n)
+        if n == 0 and hoje.hour >= 21:
+            continue
+        rot = "Hoje" if n == 0 else ("Amanhã" if n == 1 else f"{DIAS[d.weekday()][:3]} {d:%d/%m}")
+        linha.append({"text": rot, "callback_data": f"dia:{pid}:{d:%Y%m%d}"})
+        if len(linha) == 3:
+            linhas.append(linha)
+            linha = []
+    return linhas + ([linha] if linha else [])
+
+
+HORAS = [8, 10, 12, 15, 18, 19, 20, 21]
+
+
+def _botoes_horas(pid: str, dia: str) -> list[list[dict]]:
+    agora = datetime.now(TZ)
+    d = datetime.strptime(dia, "%Y%m%d").date()
+    hs = [h for h in HORAS if d > agora.date() or h > agora.hour]
+    bts = [{"text": f"{h}h", "callback_data": f"hora:{pid}:{dia}:{h:02d}"} for h in hs]
+    return [bts[i:i + 4] for i in range(0, len(bts), 4)]
 
 
 def ler(espera: int = 0) -> bool:
@@ -268,6 +312,39 @@ def ler(espera: int = 0) -> bool:
             if post in por_id:
                 por_id[post]["status"] = "trocar"
         pedidos.append(item)
+
+    def novo(texto: str, quem: str, agora: str, chat: str):
+        """Com a chave da API do Claude, cria a arte na hora; sem ela, vira pedido para a tarefa agendada."""
+        import criador
+        if criador.disponivel():
+            enviar("🎨 Criando a arte agora, leva 1 ou 2 minutinhos…", chat)
+            try:
+                p = criador.criar(texto, pauta)
+                pauta.append(p)
+                por_id[p["id"]] = p
+                _mandar_sugestao(p, f"✨ Sugestão de post {p['id']} ({quem} pediu): {p['tema']}\n"
+                                    "Se gostar, toque em ✅ e escolha o dia e o horário.")
+                return
+            except Exception as err:  # noqa: BLE001
+                print("aviso: não consegui criar na hora:", type(err).__name__, err)
+        pedir("novo", texto, quem, agora)
+        enviar("➕ Anotado, vou criar um post novo com isso. " + PRAZO, chat)
+
+    def refazer(pid: str, texto: str, quem: str, agora: str, chat: str):
+        import criador
+        if criador.disponivel() and pid in por_id:
+            enviar(f"🎨 Refazendo o post {pid} agora, leva 1 ou 2 minutinhos…", chat)
+            try:
+                p = criador.criar(texto, pauta, base=por_id[pid])
+                pauta[pauta.index(por_id[pid])] = p
+                por_id[pid] = p
+                _mandar_sugestao(p, f"✏️ Post {pid} refeito ({quem} pediu): {p['tema']}\n"
+                                    "Ele só volta para a programação quando você tocar em ✅ e escolher o dia e o horário.")
+                return
+            except Exception as err:  # noqa: BLE001
+                print("aviso: não consegui refazer na hora:", type(err).__name__, err)
+        pedir("troca", texto, quem, agora, pid)
+        enviar(f"✏️ Anotado! Vou refazer o post {pid}. " + PRAZO, chat)
 
     for u in upd.get("result", []):
         cfg["offset"] = u["update_id"]
@@ -306,14 +383,35 @@ def ler(espera: int = 0) -> bool:
                 enviar(f"Certo! O que você quer mudar no post {pid} ({por_id[pid]['tema']})?\n"
                        "Pode escrever ou mandar um ÁUDIO: o tema, o texto, uma frase, o que quiser. 🎙️", chat)
             elif acao == "livre" and pid == "novo" and k in soltos:
-                pedir("novo", soltos.pop(k), quem, agora)
-                enviar("➕ Combinado, vou criar um post novo com isso. " + PRAZO, chat)
+                novo(soltos.pop(k), quem, agora, chat)
             elif acao == "livre" and pid == "mudar" and k in soltos:
                 bts = _botoes_posts(pauta, "aplicar")
                 enviar("Em qual post eu aplico isso?" if bts else "Não há posts abertos para mudar agora.", chat, bts or None)
             elif acao == "aplicar" and pid in por_id and k in soltos:
-                pedir("troca", soltos.pop(k), quem, agora, pid)
-                enviar(f"✏️ Anotado! Vou refazer o post {pid}. " + PRAZO, chat)
+                refazer(pid, soltos.pop(k), quem, agora, chat)
+            elif acao == "prog" and pid in por_id:
+                enviar(f"🗓 Em que dia sai o post {pid} ({por_id[pid]['tema']})?", chat, _botoes_dias(pid))
+            elif acao == "dia":
+                p_id, _, dia = pid.partition(":")
+                if p_id in por_id:
+                    bts = _botoes_horas(p_id, dia)
+                    enviar("⏰ Em que horário?" if bts else "Esse dia já passou dos horários. Escolha outro dia.",
+                           chat, bts or _botoes_dias(p_id))
+            elif acao == "hora":
+                p_id, dia, h = (pid.split(":") + ["", ""])[:3]
+                if p_id in por_id and dia and h:
+                    d = datetime.strptime(dia, "%Y%m%d").date()
+                    p = por_id[p_id]
+                    p.update(data=d.isoformat(), hora=f"{h}:00", status="aprovado",
+                             semana=date.fromordinal(d.toordinal() - d.weekday()).isoformat())
+                    cfg.setdefault("disparados", {}).pop(p_id, None)
+                    enviar(f"✅ {quem} programou o post {p_id} ({p['tema']}) para {_quando(p)}. Sai sozinho. 💜")
+            elif acao == "descartar" and pid in por_id:
+                if por_id[pid].get("status") == "sugestao":
+                    pauta.remove(por_id.pop(pid))
+                    enviar(f"🗑 Post {pid} descartado.", chat)
+                else:
+                    enviar("Esse post já está programado. Para mudar, use /mudar.", chat)
             elif acao == "livre" and pid == "recado" and k in soltos:
                 texto = soltos.pop(k)
                 for c in chats():
@@ -354,8 +452,7 @@ def ler(espera: int = 0) -> bool:
             enviar(f"▶️ {quem} retomou a publicação.")
         elif cmd in ("/novo", "/ideia"):
             if resto:
-                pedir("novo", resto, quem, agora)
-                enviar("➕ Anotado, vou criar um post novo com isso. " + PRAZO, chat)
+                novo(resto, quem, agora, chat)
             else:
                 esperando[k] = "novo"
                 enviar("➕ Vamos criar! Me conta o tema ou o conteúdo do post, por texto ou por áudio. 🎙️", chat)
@@ -367,11 +464,9 @@ def ler(espera: int = 0) -> bool:
         elif k in esperando:
             alvo = esperando.pop(k)
             if alvo == "novo":
-                pedir("novo", texto, quem, agora)
-                enviar("➕ Anotado, vou criar um post novo com isso. " + PRAZO, chat)
+                novo(texto, quem, agora, chat)
             else:
-                pedir("troca", texto, quem, agora, alvo)
-                enviar(f"✏️ Anotado! Vou refazer o post {alvo}. " + PRAZO, chat)
+                refazer(alvo, texto, quem, agora, chat)
         else:
             soltos[k] = texto
             enviar("O que eu faço com isso?", chat, [
@@ -413,6 +508,44 @@ def _git(*args: str) -> int:
     return subprocess.run(["git", *args], cwd=D.parent).returncode
 
 
+def disparar() -> bool:
+    """Posts programados com horário ("hora"): quando chega a hora, dispara a publicação daquele post."""
+    import subprocess
+    cfg = config()
+    if cfg.get("pausado"):
+        return False
+    agora = datetime.now(TZ)
+    feitos = cfg.setdefault("disparados", {})
+    mudou = False
+    for p in _ler(PAUTA, []):
+        if p.get("status") != "aprovado" or not p.get("hora") or not p.get("data") or p["id"] in feitos:
+            continue
+        quando = datetime.fromisoformat(f"{p['data']}T{p['hora']}").replace(tzinfo=TZ)
+        if agora >= quando:
+            r = subprocess.run(["gh", "workflow", "run", "instagram.yml", "--ref", "main",
+                                "-R", os.environ.get("GITHUB_REPOSITORY", "Tony-Re1s/olhar-psicopedagogico"),
+                                "-f", f"id={p['id']}"])
+            if r.returncode == 0:
+                print("publicação disparada:", p["id"])
+                feitos[p["id"]] = agora.isoformat(timespec="minutes")
+                mudou = True
+    if mudou:
+        _gravar(CONFIG, cfg)
+    return mudou
+
+
+def sugestoes_pendentes() -> bool:
+    """Posts em "sugestao" criados pela tarefa agendada (caminho sem chave da API): manda a arte com os botões."""
+    pauta = _ler(PAUTA, [])
+    pend = [p for p in pauta if p.get("status") == "sugestao" and not p.get("enviada")]
+    for p in pend:
+        _mandar_sugestao(p, f"✨ Sugestão de post {p['id']}: {p['tema']}\n"
+                            "Se gostar, toque em ✅ e escolha o dia e o horário.")
+    if pend:
+        _gravar(PAUTA, pauta)
+    return bool(pend)
+
+
 def escutar():
     """Fica ligado respondendo o Telegram na hora (long polling), por até ESCUTA_MIN minutos.
     Grava e manda para o GitHub a cada mudança. O workflow se reinicia sozinho no fim."""
@@ -423,6 +556,8 @@ def escutar():
         _git("pull", "--rebase", "-q", "origin", "main")
         try:
             mudou = ler(espera=50)
+            mudou = disparar() or mudou
+            mudou = sugestoes_pendentes() or mudou
         except urllib.error.HTTPError as err:
             print("aviso: Telegram respondeu", err.code)
             time.sleep(30)

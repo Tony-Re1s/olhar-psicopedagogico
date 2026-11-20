@@ -50,8 +50,12 @@ jobs:
       - name: Conversor de áudio
         if: steps.acao.outputs.acao == 'ler' || steps.acao.outputs.acao == 'escutar'
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-noto-color-emoji >/dev/null
           pip install -q faster-whisper
+          if [ "${{ steps.acao.outputs.acao }}" = "escutar" ]; then
+            pip install -q playwright pillow
+            python -m playwright install --with-deps chromium >/dev/null
+          fi
       - name: Dependências da prévia
         if: steps.acao.outputs.acao == 'previa'
         run: |
@@ -64,6 +68,8 @@ jobs:
           TELEGRAM_CHATS: ${{ secrets.TELEGRAM_CHATS }}
           IG_TOKEN: ${{ secrets.IG_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [ "${{ steps.acao.outputs.acao }}" = "checar" ]; then python instagram/checar.py; exit 0; fi
           if [ -z "$TELEGRAM_TOKEN" ]; then echo "TELEGRAM_TOKEN não configurado — nada a fazer."; exit 0; fi

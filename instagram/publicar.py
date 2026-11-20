@@ -219,6 +219,8 @@ def escolher(pauta: list[dict], feitos: dict, forcado: str | None, sem_reels=Fal
     for p in sorted(pauta, key=lambda x: (x.get("data") or "", x["id"])):
         if p["id"] in feitos or p.get("status") != "aprovado":
             continue
+        if p.get("hora"):      # horário escolhido no Telegram: o bot dispara este post na hora certa (--id)
+            continue
         if sem_reels and p["formato"] == "reels":
             continue
         if not p.get("data") or datetime.fromisoformat(p["data"]).date() <= HOJE:
@@ -237,7 +239,10 @@ def main():
         print("Publicação pausada pelo Telegram (/pausar).")
         return
     e = estado() if MIDIA.exists() else {"publicados": {}}
-    if [k for k, v in e["publicados"].items() if v.get("data") == HOJE.isoformat()] and not forcado:
+    if forcado and forcado in {**e["publicados"], **e.get("manuais", {})}:
+        print(f"O post {forcado} já foi publicado; não publico de novo.")
+        return
+    if [k for k, v in e["publicados"].items() if v.get("data") == HOJE.isoformat() and not v.get("avulso")] and not forcado:
         print("Já saiu post hoje.")
         return
     feitos = {**e["publicados"], **e.get("manuais", {})}
@@ -264,7 +269,7 @@ def main():
         pasta, leg = estudio.gerar(post), estudio.legenda(post)
     tok = token()
     res = publicar(subir_midias(post, pasta), leg, tok)
-    e["publicados"][post["id"]] = dict(res, data=HOJE.isoformat(), tema=post["tema"])
+    e["publicados"][post["id"]] = dict(res, data=HOJE.isoformat(), tema=post["tema"], avulso=bool(post.get("hora")))
     salvar_estado(e, f"publicado {post['id']}")
     print("PUBLICADO:", res.get("link"))
     telegram.avisar(f"✅ Post publicado: {post['tema']}\n{res.get('link') or ''}")
