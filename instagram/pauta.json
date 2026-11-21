@@ -264,9 +264,12 @@
    "texto": "Corre no feed para entender a diferença entre fase e sinal de atenção.",
    "pergunta": "Qual comportamento do seu filho mais te desafia hoje?"
   },
-  "status": "sugestao",
+  "status": "aprovado",
   "pedido": "Criar conteúdo sobre comportamentos. É TOD, por exemplo.",
   "criado": "2026-11-20T17:05-03:00",
-  "enviada": true
+  "enviada": true,
+  "data": "2026-11-24",
+  "hora": "10:00",
+  "semana": "2026-11-23"
  }
 ]
