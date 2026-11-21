@@ -406,9 +406,12 @@
    "texto": "Corre no feed para ver como o brincar ajuda no desenvolvimento.",
    "pergunta": "Qual a brincadeira favorita do seu filho?"
   },
-  "status": "sugestao",
+  "status": "aprovado",
   "pedido": "Criar sobre a importância do brincar",
   "criado": "2026-11-20T21:28-03:00",
-  "enviada": true
+  "enviada": true,
+  "data": "2026-11-26",
+  "hora": "20:00",
+  "semana": "2026-11-23"
  }
 ]
