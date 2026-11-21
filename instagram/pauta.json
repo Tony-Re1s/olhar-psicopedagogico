@@ -346,5 +346,69 @@
   "pedido": "Criar conteúdo sobre disortografia.",
   "criado": "2026-11-20T21:15-03:00",
   "enviada": true
+ },
+ {
+  "id": "006",
+  "formato": "carrossel",
+  "tema": "A importância do brincar para a aprendizagem",
+  "slides": [
+   {
+    "modelo": "capa",
+    "selo": "Para pais e mães",
+    "titulo": "Brincar também\né *aprender*",
+    "texto": "Por que o brincar é tão importante para o desenvolvimento do seu filho."
+   },
+   {
+    "modelo": "texto",
+    "selo": "Você sabia?",
+    "emoji": "🧩",
+    "titulo": "Brincando, a criança\n*constrói* aprendizados",
+    "caixa": "Quando brinca, a criança experimenta, resolve problemas, imagina e se expressa. Tudo isso fortalece a base para ler, escrever e raciocinar."
+   },
+   {
+    "modelo": "lista",
+    "selo": "O que o brincar desenvolve",
+    "titulo": "Em cada brincadeira...",
+    "icone": "♡",
+    "itens": [
+     "*Atenção* e *concentração*",
+     "*Linguagem* e *imaginação*",
+     "*Raciocínio* e criatividade",
+     "Controle das *emoções* e convivência"
+    ]
+   },
+   {
+    "modelo": "texto",
+    "selo": "Na prática",
+    "emoji": "🎲",
+    "titulo": "Como brincar\n*junto* em casa",
+    "caixa": "Jogos de tabuleiro, cantigas, massinha, quebra-cabeça e histórias inventadas já ajudam muito. Reserve alguns minutos por dia, sem pressa e sem cobrança."
+   },
+   {
+    "modelo": "cta",
+    "titulo": "Quer entender melhor?",
+    "texto": "Me chama para conversar sobre como seu filho aprende.\nAtendimento em São Paulo — Zona Leste.",
+    "botao": "Agende pelo WhatsApp 💜"
+   }
+  ],
+  "legenda": "Brincar não é perda de tempo: é um dos jeitos mais potentes de a criança aprender 💜\n\nQuando brinca, seu filho:\n• Treina atenção e concentração\n• Desenvolve linguagem e imaginação\n• Exercita o raciocínio e a criatividade\n• Aprende a lidar com emoções e a conviver com os outros\n\nPara começar em casa:\n🎲 jogos de tabuleiro e quebra-cabeças\n🎶 cantigas e rimas\n📖 histórias inventadas juntos\n\nSepare alguns minutos por dia para brincar com ele, sem pressa e sem cobrança. Isso também fortalece o vínculo entre vocês.\n\n📲 Quer entender melhor como seu filho aprende? Me chama no WhatsApp — link na bio.\n\nSalve este post para lembrar e me conta nos comentários: qual a brincadeira favorita do seu filho?",
+  "hashtags": [
+   "psicopedagogia",
+   "brincar",
+   "aprendizagem",
+   "desenvolvimentoinfantil",
+   "maternidade"
+  ],
+  "story": {
+   "selo": "Post novo",
+   "emoji": "🧩",
+   "titulo": "Brincar também\né *aprender*",
+   "texto": "Corre no feed para ver como o brincar ajuda no desenvolvimento.",
+   "pergunta": "Qual a brincadeira favorita do seu filho?"
+  },
+  "status": "sugestao",
+  "pedido": "Criar sobre a importância do brincar",
+  "criado": "2026-11-20T21:28-03:00",
+  "enviada": true
  }
 ]
