@@ -271,5 +271,80 @@
   "data": "2026-11-24",
   "hora": "20:00",
   "semana": "2026-11-23"
+ },
+ {
+  "id": "005",
+  "formato": "carrossel",
+  "tema": "Disortografia: o que é e quais sinais observar",
+  "slides": [
+   {
+    "modelo": "capa",
+    "selo": "Para pais e mães",
+    "titulo": "Você já ouviu\nfalar em\n*disortografia?*",
+    "texto": "Entenda o que é e quais sinais merecem um olhar atento."
+   },
+   {
+    "modelo": "texto",
+    "selo": "O que é",
+    "emoji": "✏️",
+    "titulo": "Dificuldade na\n*escrita correta*",
+    "caixa": "A disortografia é uma dificuldade persistente em escrever as palavras corretamente. Ela não tem a ver com preguiça nem com falta de capricho."
+   },
+   {
+    "modelo": "lista",
+    "selo": "Fique de olho",
+    "titulo": "Quando a criança...",
+    "icone": "1",
+    "itens": [
+     "*Troca letras* parecidas ao escrever (f/v, p/b, t/d)",
+     "Escreve a mesma palavra *de jeitos diferentes*",
+     "*Junta ou separa* palavras de forma errada",
+     "Repete os erros *mesmo após a correção*"
+    ]
+   },
+   {
+    "modelo": "texto",
+    "selo": "Importante",
+    "emoji": "🌱",
+    "titulo": "Um sinal sozinho\n*não é diagnóstico*",
+    "caixa": "Errar faz parte da alfabetização. O diagnóstico é feito por profissionais habilitados. Se os erros persistem por muito tempo, uma avaliação ajuda a entender o que está acontecendo."
+   },
+   {
+    "modelo": "lista",
+    "selo": "Em casa",
+    "titulo": "Como acolher no dia a dia",
+    "icone": "♡",
+    "itens": [
+     "*Não corrija tudo* de uma vez: escolha um foco",
+     "Valorize *o que ele já escreve bem*",
+     "Converse com a *escola* sobre como apoiar"
+    ]
+   },
+   {
+    "modelo": "cta",
+    "titulo": "Ficou com dúvida?",
+    "texto": "Me chama para conversar.\nAtendimento em São Paulo — Zona Leste.",
+    "botao": "Agende pelo WhatsApp 💜"
+   }
+  ],
+  "legenda": "Seu filho escreve cheio de erros e você já se perguntou se é só desatenção? 💜\n\nA disortografia é uma dificuldade persistente em escrever as palavras corretamente. Ela não tem a ver com preguiça nem com falta de capricho.\n\nAlguns sinais que merecem um olhar atento:\n1. Trocar letras parecidas ao escrever (f/v, p/b, t/d)\n2. Escrever a mesma palavra de jeitos diferentes\n3. Juntar ou separar palavras de forma errada\n4. Repetir os erros mesmo depois de corrigidos\n\nUm sinal sozinho não é diagnóstico, e errar faz parte da alfabetização. O diagnóstico é feito por profissionais habilitados. Mas, quando os erros persistem por muito tempo, vale buscar uma avaliação para entender o que está acontecendo.\n\nEm casa, ajuda não corrigir tudo de uma vez, valorizar o que a criança já escreve bem e conversar com a escola sobre como apoiá-la.\n\n📲 Ficou com dúvida? Me chama no WhatsApp — link na bio.\n\nSalve este post para lembrar e me conta nos comentários: seu filho já passou por isso?",
+  "hashtags": [
+   "psicopedagogia",
+   "disortografia",
+   "alfabetizacao",
+   "dificuldadedeaprendizagem",
+   "maternidade"
+  ],
+  "story": {
+   "selo": "Post novo",
+   "emoji": "✏️",
+   "titulo": "Você já ouviu\nfalar em\n*disortografia?*",
+   "texto": "Corre no feed para entender o que é e quais sinais observar.",
+   "pergunta": "Seu filho costuma errar muito ao escrever?"
+  },
+  "status": "sugestao",
+  "pedido": "Criar conteúdo sobre disortografia.",
+  "criado": "2026-11-20T21:15-03:00",
+  "enviada": true
  }
 ]
