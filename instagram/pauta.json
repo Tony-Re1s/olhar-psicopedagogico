@@ -607,5 +607,196 @@
    "texto": "Corre no feed para ver o passo a passo.",
    "pergunta": "Qual sua maior dúvida sobre a avaliação?"
   }
+ },
+ {
+  "id": "010",
+  "semana": "2026-11-30",
+  "data": "2026-11-30",
+  "formato": "carrossel",
+  "status": "rascunho",
+  "tema": "Atenção e concentração: como ajudar seu filho a focar nos estudos",
+  "slides": [
+   {
+    "modelo": "capa",
+    "selo": "Para pais e mães",
+    "titulo": "Seu filho se\n*distrai* com tudo?",
+    "texto": "Dicas simples para ajudar na atenção na hora de estudar."
+   },
+   {
+    "modelo": "texto",
+    "selo": "Você sabia?",
+    "emoji": "🎯",
+    "titulo": "Atenção também\nse *desenvolve*",
+    "caixa": "O tempo que a criança consegue manter o foco cresce com a idade. Pedir uma hora seguida de concentração a uma criança pequena é pedir demais."
+   },
+   {
+    "modelo": "lista",
+    "selo": "Na prática",
+    "titulo": "Em casa, tente...",
+    "icone": "1",
+    "itens": [
+     "Um *cantinho* de estudo sem TV e celular",
+     "Tarefas em *blocos curtos*, com pausas",
+     "*Uma instrução* de cada vez",
+     "Começar pelo que exige *mais energia*"
+    ]
+   },
+   {
+    "modelo": "texto",
+    "selo": "Fique atento",
+    "emoji": "🌱",
+    "titulo": "Quando buscar\n*ajuda*",
+    "caixa": "Se a distração é constante, aparece em casa e na escola e atrapalha o aprender, converse com a escola e busque avaliação. Um sinal sozinho não é diagnóstico."
+   },
+   {
+    "modelo": "cta",
+    "titulo": "Vamos conversar?",
+    "texto": "Me chama para entender como seu filho aprende.\nAtendimento em São Paulo — Zona Leste.",
+    "botao": "Agende pelo WhatsApp 💜"
+   }
+  ],
+  "legenda": "Você senta com seu filho para fazer a lição e, em cinco minutos, ele já está olhando para outra coisa? 💜\n\nA atenção também se desenvolve com o tempo — e o ambiente ajuda muito.\n\nAlgumas ideias para casa:\n• Um cantinho de estudo sem TV e sem celular por perto\n• Tarefas em blocos curtos, com pequenas pausas\n• Uma instrução de cada vez\n• Começar pelo que exige mais energia\n\nSe a distração é constante, aparece em casa e na escola e atrapalha o aprender, vale conversar com a escola e buscar uma avaliação. Lembrando: um sinal sozinho não é diagnóstico.\n\n📲 Quer entender melhor como seu filho aprende? Me chama no WhatsApp — link na bio.\n\nSalve este post para a próxima lição de casa e me conta nos comentários: qual dessas dicas você já usa?",
+  "hashtags": [
+   "psicopedagogia",
+   "aprendizagem",
+   "dicasparapais",
+   "maternidade",
+   "licaodecasa"
+  ],
+  "story": {
+   "selo": "Post novo",
+   "emoji": "🎯",
+   "titulo": "Seu filho se\n*distrai* com tudo?",
+   "texto": "Corre no feed para ver dicas para a hora de estudar.",
+   "pergunta": "O que mais distrai seu filho na hora da lição?"
+  }
+ },
+ {
+  "id": "011",
+  "semana": "2026-11-30",
+  "data": "2026-12-02",
+  "formato": "carrossel",
+  "status": "rascunho",
+  "tema": "Parceria família–escola: o que perguntar na reunião de fim de ano",
+  "slides": [
+   {
+    "modelo": "capa",
+    "selo": "Para pais e mães",
+    "titulo": "Reunião de\n*fim de ano*\nna escola",
+    "texto": "O que perguntar para entender como seu filho está aprendendo."
+   },
+   {
+    "modelo": "texto",
+    "selo": "Por que importa",
+    "emoji": "🤝",
+    "titulo": "Família e escola\n*do mesmo lado*",
+    "caixa": "Quando casa e escola conversam, fica mais fácil perceber o que vai bem, o que precisa de apoio e como ajudar a criança."
+   },
+   {
+    "modelo": "lista",
+    "selo": "Leve para a reunião",
+    "titulo": "Pergunte...",
+    "icone": "♡",
+    "itens": [
+     "Como ele está na *leitura e escrita*?",
+     "Como é a *participação* nas aulas?",
+     "Como ele *se relaciona* com os colegas?",
+     "O que podemos *reforçar nas férias*?"
+    ]
+   },
+   {
+    "modelo": "texto",
+    "selo": "Depois da reunião",
+    "emoji": "📝",
+    "titulo": "Anote e\n*acompanhe*",
+    "caixa": "Guarde as observações da professora e compare com o que você vê em casa. Se algo se repete, já é um bom ponto de partida para buscar orientação."
+   },
+   {
+    "modelo": "cta",
+    "titulo": "Ficou alguma dúvida?",
+    "texto": "Me chama para conversar sobre como seu filho aprende.\nAtendimento em São Paulo — Zona Leste.",
+    "botao": "Agende pelo WhatsApp 💜"
+   }
+  ],
+  "legenda": "A reunião de fim de ano é uma ótima chance de entender como seu filho está aprendendo — vá com perguntas prontas 💜\n\nLeve para a conversa com a escola:\n• Como ele está na leitura e na escrita?\n• Como é a participação nas aulas?\n• Como ele se relaciona com os colegas?\n• O que podemos reforçar nas férias?\n\nDepois, anote o que ouviu e compare com o que você observa em casa. Se algo se repete, já é um bom ponto de partida para buscar orientação.\n\nQuando família e escola estão do mesmo lado, a criança só tem a ganhar.\n\n📲 Ficou com alguma dúvida depois da reunião? Me chama no WhatsApp — link na bio.\n\nSalve este post para levar na reunião e comente: qual pergunta você acrescentaria?",
+  "hashtags": [
+   "psicopedagogia",
+   "familiaeescola",
+   "dicasparapais",
+   "aprendizagem",
+   "maternidade"
+  ],
+  "story": {
+   "selo": "Post novo",
+   "emoji": "🤝",
+   "titulo": "Reunião de\n*fim de ano*",
+   "texto": "Corre no feed para ver o que perguntar à escola.",
+   "pergunta": "O que você mais quer saber na reunião da escola?"
+  }
+ },
+ {
+  "id": "012",
+  "semana": "2026-11-30",
+  "data": "2026-12-04",
+  "formato": "carrossel",
+  "status": "rascunho",
+  "tema": "Mitos e verdades sobre a psicopedagogia",
+  "slides": [
+   {
+    "modelo": "capa",
+    "selo": "Para pais e mães",
+    "titulo": "Mitos e\n*verdades* sobre a\npsicopedagogia",
+    "texto": "Tire suas dúvidas antes de procurar atendimento."
+   },
+   {
+    "modelo": "texto",
+    "selo": "Mito",
+    "emoji": "❌",
+    "titulo": "\"É só para quem\ntem *problema*\"",
+    "caixa": "A psicopedagogia ajuda a entender como a criança aprende. Pode ser procurada ao primeiro sinal de dificuldade, sem esperar a situação piorar."
+   },
+   {
+    "modelo": "texto",
+    "selo": "Mito",
+    "emoji": "❌",
+    "titulo": "\"A psicopedagoga\ndá o *diagnóstico*\"",
+    "caixa": "Ela avalia como a criança aprende e orienta a família. Diagnósticos clínicos são feitos por médicos e outros profissionais da saúde."
+   },
+   {
+    "modelo": "texto",
+    "selo": "Verdade",
+    "emoji": "✅",
+    "titulo": "A família e a\nescola *participam*",
+    "caixa": "O trabalho envolve conversas com os pais e, quando necessário, com a escola, para que todos ajudem a criança do mesmo jeito."
+   },
+   {
+    "modelo": "texto",
+    "selo": "Verdade",
+    "emoji": "✅",
+    "titulo": "Cada criança tem\n*seu tempo*",
+    "caixa": "Não existe fórmula pronta. O acompanhamento respeita o ritmo de cada criança e é ajustado ao longo do caminho."
+   },
+   {
+    "modelo": "cta",
+    "titulo": "Quer agendar?",
+    "texto": "Me chama para tirar suas dúvidas.\nAtendimento em São Paulo — Zona Leste.",
+    "botao": "Agende pelo WhatsApp 💜"
+   }
+  ],
+  "legenda": "Já ouviu que psicopedagogia é só para criança com problema? Vamos separar mito de verdade 💜\n\n❌ Mito: é só para quem tem problema.\nA psicopedagogia ajuda a entender como a criança aprende e pode ser procurada ao primeiro sinal de dificuldade.\n\n❌ Mito: a psicopedagoga dá o diagnóstico.\nEla avalia como a criança aprende e orienta a família. Diagnósticos clínicos são feitos por médicos e outros profissionais da saúde.\n\n✅ Verdade: a família e a escola participam.\n\n✅ Verdade: cada criança tem seu tempo — não existe fórmula pronta.\n\nAtendo com hora marcada em São Paulo, na Zona Leste.\n\n📲 Quer agendar ou tirar dúvidas? Me chama no WhatsApp — link na bio.\n\nSalve este post e comente: qual mito você já ouviu por aí?",
+  "hashtags": [
+   "psicopedagogia",
+   "mitoseverdades",
+   "aprendizagem",
+   "zonalestesp",
+   "dicasparapais"
+  ],
+  "story": {
+   "selo": "Post novo",
+   "emoji": "✅",
+   "titulo": "Mitos e\n*verdades*",
+   "texto": "Corre no feed para tirar suas dúvidas sobre psicopedagogia.",
+   "pergunta": "Que dúvida você tem sobre psicopedagogia?"
+  }
  }
 ]
